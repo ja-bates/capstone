@@ -84,6 +84,8 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
             
             DispatchQueue.main.async {
                 self?.label.text = text
+                // Send the recognized text to the server
+                self?.sendTextToServer(text: text)
             }
         }
         
@@ -92,6 +94,30 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         } catch {
             print(error)
         }
+    }
+    
+    //POST data to server
+    private func sendTextToServer(text: String) {
+        guard let url = URL(string: "http://192.168.2.20:50000") else { return }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.httpBody = text.data(using: .utf8)
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("Error sending text to server: \(error)")
+                return
+            }
+            
+            // Handle the response from the server here, if necessary
+            if let response = response as? HTTPURLResponse {
+                print("Server response: \(response.statusCode)")
+            }
+        }
+        
+        task.resume()
     }
 }
 
