@@ -1,85 +1,97 @@
-//
-//  ViewController.swift
-//  TextRecognition
-//
-//  Created by James Bates on 2023-10-16.
-//
-
-import Vision
 import UIKit
+import Vision
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
     
-    // Define a UILabel to display recognized text
     private let label: UILabel = {
         let label = UILabel()
-        label.numberOfLines = 0 // Allow multiple lines
-        label.textAlignment = .center // Center-align text
-        label.text = "starting..." //Initial text
+        label.numberOfLines = 0
+        label.textAlignment = .center
+        label.text = "starting..."
         return label
     }()
     
-    // Define a UIImageView to display the image
     private let imageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.image = UIImage(named: "example1") // Set initial image
-        imageView.contentMode = .scaleAspectFit //Scale image to fit
+        imageView.contentMode = .scaleAspectFit
         return imageView
     }()
+    
+    private let cameraButton: UIButton = {
+        let button = UIButton()
+        button.setTitle("Take Picture", for: .normal)
+        button.backgroundColor = .systemBlue
 
+        button.addTarget(self, action: #selector(didTapTakePicture), for: .touchUpInside)
+        return button
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Add label and imageView as subviews to the view controller's view
+        view.backgroundColor = .white
         view.addSubview(label)
         view.addSubview(imageView)
+        view.addSubview(cameraButton)
         
-        // Perform text recognition on the image
-        recognizeText(image: imageView.image)
+
+        //cameraButton.frame = CGRect(x: 20, y: label.frame.maxY + 20, width: view.frame.size.width - 40, height: 50)
     }
     
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        // Set frames for imageView and label after layout calculations
-        imageView.frame = CGRect(x: 20, y: view.safeAreaInsets.top, width: view.frame.size.width-40, height: view.frame.size.width-40)
-        label.frame = CGRect(x: 20, y: view.frame.size.width + view.safeAreaInsets.top, width: view.frame.size.width-40, height: 300)
+        let size = view.frame.size.width - 40
+        imageView.frame = CGRect(x: 20, y: view.safeAreaInsets.top, width: size, height: size)
+        label.frame = CGRect(x: 20, y: imageView.frame.maxY + 20, width: size, height: 100)
+        cameraButton.frame = CGRect(x: 20, y: label.frame.maxY + 20, width: size, height: 50)
     }
 
-    // Function to recognize text in an image using Vision framework
+    @objc private func didTapTakePicture() {
+        let picker = UIImagePickerController()
+        if UIImagePickerController.isSourceTypeAvailable(.camera) {
+            picker.sourceType = .camera
+            picker.delegate = self
+            picker.allowsEditing = false
+            present(picker, animated: true)
+        } else {
+            print("Camera not available")
+        }
+    }
+    
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        picker.dismiss(animated: true, completion: nil)
+        guard let image = info[.originalImage] as? UIImage else {
+            return
+        }
+        imageView.image = image
+        recognizeText(image: image)
+    }
+    
     private func recognizeText(image: UIImage?) {
-        guard let cgImage = image?.cgImage else{
-            fatalError("could not get CGImage") } // Exit if there's no CGImage
+        guard let cgImage = image?.cgImage else {
+            fatalError("could not get CGImage")
+        }
         
-        // Create a handler for the CGImage
         let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
-        
-        // Create a text recognition request with a completion handler
         let request = VNRecognizeTextRequest { [weak self] request, error in
             guard let observations = request.results as? [VNRecognizedTextObservation],
-                  error == nil else{
+                  error == nil else {
                 return
             }
             
-            // Extract text from the top candidate of each observation
             let text = observations.compactMap({
                 $0.topCandidates(1).first?.string
             }).joined(separator: ", ")
             
-            // Update UI on the main thread
             DispatchQueue.main.async {
                 self?.label.text = text
             }
         }
         
-        // Perform the text recognition request
         do {
             try handler.perform([request])
+        } catch {
+            print(error)
         }
-        catch {
-            // Hanndle errors - print(error)
-            label.text = "\(error)"
-        }
-        
     }
-
 }
 
