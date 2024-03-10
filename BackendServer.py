@@ -21,7 +21,7 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
         # Prepare a response to send back to the client
-        response = bytes("Data received", "utf-8")
+        response = bytes("Data received and sent to Arduino", "utf-8")
         
         # Write the response data to the output stream, sending it back to the client
         self.wfile.write(response)
