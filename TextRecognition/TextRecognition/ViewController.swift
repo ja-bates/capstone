@@ -7,7 +7,8 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         let label = UILabel()
         label.numberOfLines = 0
         label.textAlignment = .center
-        label.text = "starting..."
+        label.text = "FeelScript"
+        label.font = UIFont(name: "AvenirNext-DemiBold", size: 30)
         return label
     }()
     
@@ -42,7 +43,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         let size = view.frame.size.width - 40
         imageView.frame = CGRect(x: 20, y: view.safeAreaInsets.top, width: size, height: size)
         label.frame = CGRect(x: 20, y: imageView.frame.maxY + 20, width: size, height: 100)
-        cameraButton.frame = CGRect(x: 20, y: label.frame.maxY + 20, width: size, height: 50)
+        cameraButton.frame = CGRect(x: 20, y: label.frame.maxY + 10, width: size, height: 50)
     }
 
     @objc private func didTapTakePicture() {
