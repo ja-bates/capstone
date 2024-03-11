@@ -1,5 +1,10 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import json
+import serial 
+import time
+
+arduino = serial.Serial('/dev/cu.usbserial-AI02Q766', 115200, timeout=1)
+time.sleep(2) # short delay to initialize
 
 class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
 
@@ -13,6 +18,10 @@ class SimpleHTTPRequestHandler(BaseHTTPRequestHandler):
         #print(body)  #debug
         #data = json.loads(body.decode('utf-8'))
         print("Received:", body)
+
+        # Send the data to the arduino over serial
+        arduino.write(body.encode('utf-8'))
+        arduino.flush()
         
         #200 = standard response for successful HTTP
         self.send_response(200) 

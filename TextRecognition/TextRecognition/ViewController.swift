@@ -98,7 +98,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     
     //POST data to server
     private func sendTextToServer(text: String) {
-        guard let url = URL(string: "http://192.168.2.20:50000") else { return }
+        guard let url = URL(string: "http://172.20.10.8:50000") else { return }
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
